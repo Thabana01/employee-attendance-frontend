@@ -18,12 +18,12 @@ const AttendanceDashboard = () => {
   const fetchAttendance = async () => {
     try {
       setLoading(true);
-      
+
       const params = new URLSearchParams();
       if (filters.date) params.append('date', filters.date);
       if (filters.search) params.append('search', filters.search);
 
-      const url = `http://localhost:5000/api/attendance?${params}`;
+      const url = `https://employee-attendance-backend-1.onrender.com/api/attendance?${params}`;
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -31,13 +31,10 @@ const AttendanceDashboard = () => {
       }
 
       const data = await response.json();
-
-      // Set attendance using the `data` array from backend
-      const records = data.data || [];
-      setAttendance(records);
+      setAttendance(data);
 
       // Calculate statistics
-      calculateStats(records);
+      calculateStats(data);
     } catch (error) {
       console.error('Error fetching attendance:', error);
       alert('Error loading attendance data. Make sure the backend server is running.');
@@ -49,17 +46,17 @@ const AttendanceDashboard = () => {
   };
 
   // Calculate statistics from attendance data
-  const calculateStats = (records) => {
-    const total = records.length;
-    const present = records.filter(record => record.status === 'Present').length;
-    const absent = records.filter(record => record.status === 'Absent').length;
+  const calculateStats = (data) => {
+    const total = data.length;
+    const present = data.filter(record => record.status === 'Present').length;
+    const absent = data.filter(record => record.status === 'Absent').length;
     const attendanceRate = total > 0 ? ((present / total) * 100) : 0;
 
     setStats({
       total,
       present,
       absent,
-      attendanceRate: Math.round(attendanceRate * 100) / 100 // Round to 2 decimal places
+      attendanceRate: Math.round(attendanceRate * 100) / 100 // 2 decimal places
     });
   };
 
@@ -71,7 +68,7 @@ const AttendanceDashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this attendance record?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/attendance/${id}`, {
+        const response = await fetch(`https://employee-attendance-backend-1.onrender.com/api/attendance/${id}`, {
           method: 'DELETE'
         });
 
@@ -106,10 +103,11 @@ const AttendanceDashboard = () => {
   return (
     <div className="dashboard">
       <h2>Attendance Dashboard</h2>
-      
+
       {/* Statistics Cards */}
       <div className="stats-cards">
         <div className="stat-card total">
+          <div className="stat-icon"></div>
           <div className="stat-content">
             <h3>Total Records</h3>
             <div className="stat-number">{stats.total}</div>
@@ -118,6 +116,7 @@ const AttendanceDashboard = () => {
         </div>
 
         <div className="stat-card present">
+          <div className="stat-icon"></div>
           <div className="stat-content">
             <h3>Present</h3>
             <div className="stat-number">{stats.present}</div>
@@ -128,6 +127,7 @@ const AttendanceDashboard = () => {
         </div>
 
         <div className="stat-card absent">
+          <div className="stat-icon"></div>
           <div className="stat-content">
             <h3>Absent</h3>
             <div className="stat-number">{stats.absent}</div>
@@ -138,6 +138,7 @@ const AttendanceDashboard = () => {
         </div>
 
         <div className="stat-card rate">
+          <div className="stat-icon"></div>
           <div className="stat-content">
             <h3>Attendance Rate</h3>
             <div className="stat-number">{stats.attendanceRate}%</div>
@@ -157,7 +158,7 @@ const AttendanceDashboard = () => {
             placeholder="Search employees..."
           />
         </div>
-        
+
         <div className="filter-group">
           <label>Filter by Date:</label>
           <input
@@ -166,7 +167,7 @@ const AttendanceDashboard = () => {
             onChange={(e) => handleFilterChange('date', e.target.value)}
           />
         </div>
-        
+
         {(filters.date || filters.search) && (
           <button className="clear-filters" onClick={clearFilters}>
             Clear Filters
@@ -176,7 +177,10 @@ const AttendanceDashboard = () => {
 
       {/* Refresh Button */}
       <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
-        <button onClick={fetchAttendance} className="refresh-btn">
+        <button 
+          onClick={fetchAttendance}
+          className="refresh-btn"
+        >
           Refresh Data
         </button>
       </div>
@@ -186,7 +190,15 @@ const AttendanceDashboard = () => {
         <div className="no-data">
           <p>No attendance records found.</p>
           {(filters.date || filters.search) ? (
-            <p>Try adjusting your search criteria or <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}>clear filters</button>.</p>
+            <p>
+              Try adjusting your search criteria or{' '}
+              <button 
+                onClick={clearFilters} 
+                style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                clear filters
+              </button>.
+            </p>
           ) : (
             <p>Go to "Mark Attendance" to add records.</p>
           )}
@@ -220,7 +232,10 @@ const AttendanceDashboard = () => {
                     </span>
                   </td>
                   <td>
-                    <button className="delete-btn" onClick={() => handleDelete(record.id)}>
+                    <button 
+                      className="delete-btn"
+                      onClick={() => handleDelete(record.id)}
+                    >
                       Delete
                     </button>
                   </td>

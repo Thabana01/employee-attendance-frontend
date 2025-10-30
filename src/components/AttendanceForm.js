@@ -82,33 +82,35 @@ const AttendanceForm = () => {
     setIsSubmitting(true);
     setMessage('');
 
-    try {
-      const response = await fetch('http://localhost:5000/api/attendance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    // Inside handleSubmit()
+try {
+  const response = await fetch('https://employee-attendance-backend-1.onrender.com/api/attendance', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData),
+  });
 
-      const data = await response.json();
+  const data = await response.json();
 
-      if (response.ok) {
-        setMessage({ type: 'success', text: data.message });
-        setFormData({
-          employeeName: '',
-          employeeID: '',
-          date: new Date().toISOString().split('T')[0],
-          status: 'Present'
-        });
-        setErrors({ employeeName: '', employeeID: '' });
-      } else {
-        setMessage({ type: 'error', text: data.error });
-      }
-    } catch (error) {
-      setMessage({ 
-        type: 'error', 
-        text: 'Error connecting to server. Make sure the backend is running on port 5000.' 
-      });
-    } finally {
+  if (response.ok) {
+    setMessage({ type: 'success', text: data.message });
+    setFormData({
+      employeeName: '',
+      employeeID: '',
+      date: new Date().toISOString().split('T')[0],
+      status: 'Present'
+    });
+    setErrors({ employeeName: '', employeeID: '' });
+  } else {
+    setMessage({ type: 'error', text: data.error });
+  }
+} catch (error) {
+  setMessage({ 
+    type: 'error', 
+    text: 'Error connecting to server. Make sure the backend is live.' 
+  });
+}
+ finally {
       setIsSubmitting(false);
     }
   };
