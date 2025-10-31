@@ -1,27 +1,28 @@
+/* ===== PROFESSIONAL FOOTER STYLES ===== */
 .professional-footer {
-  background: var(--text-primary);
+  background: skyblue;
   color: white;
   margin-top: auto;
 }
 
 .footer-content {
-  max-width: 1200px;
+  max-width: 2200px;
   margin: 0 auto;
-  padding: var(--space-2xl) var(--space-xl);
+  padding: 5px 3px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-2xl);
+  gap: 40px;
 }
 
 .footer-section h4 {
   color: white;
-  margin-bottom: var(--space-lg);
-  font-size: var(--font-size-lg);
+  margin-bottom: 20px;
+  font-size: 18px;
   font-weight: 700;
 }
 
 .footer-section p {
-  margin-bottom: var(--space-md);
+  margin-bottom: 15px;
   opacity: 0.8;
   line-height: 1.6;
 }
@@ -29,16 +30,16 @@
 .footer-links {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  margin-top: var(--space-lg);
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .footer-links a {
   color: white;
   opacity: 0.8;
   text-decoration: none;
-  transition: opacity var(--transition-fast);
-  font-size: var(--font-size-sm);
+  transition: opacity 0.3s;
+  font-size: 14px;
 }
 
 .footer-links a:hover {
@@ -49,34 +50,34 @@
 .contact-item {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
+  gap: 15px;
+  margin-bottom: 15px;
   opacity: 0.8;
 }
 
 .contact-icon {
-  font-size: var(--font-size-lg);
+  font-size: 16px;
   width: 20px;
   text-align: center;
 }
 
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: var(--space-lg) var(--space-xl);
+  padding: 20px 30px;
   text-align: center;
 }
 
 .footer-bottom p {
   margin: 0;
   opacity: 0.7;
-  font-size: var(--font-size-sm);
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {
   .footer-content {
     grid-template-columns: 1fr;
-    gap: var(--space-xl);
-    padding: var(--space-xl) var(--space-lg);
+    gap: 30px;
+    padding: 30px 20px;
   }
   
   .footer-section {
