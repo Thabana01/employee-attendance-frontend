@@ -116,7 +116,7 @@ try {
   };
 
   const getExampleID = () => {
-    const examples = ['EMP001', '12345', 'STF2024', '1001'];
+    const examples = [''];
     return examples[Math.floor(Math.random() * examples.length)];
   };
 
@@ -145,7 +145,7 @@ try {
             value={formData.employeeName}
             onChange={handleChange}
             required
-            placeholder="e.g., John Smith, Mary-Jane, O'Brian"
+            placeholder=""
             className={errors.employeeName ? 'input-error' : ''}
           />
           {errors.employeeName && <div className="error-message">{errors.employeeName}</div>}
@@ -206,9 +206,7 @@ try {
         </button>
 
         <div style={{ marginTop: '1rem', fontSize: '0.9rem', color: '#666', textAlign: 'center' }}>
-          <p><strong>Validation Rules:</strong></p>
-          <p>• Name: Letters, spaces, hyphens (-), apostrophes (') only</p>
-          <p>• ID: Must contain numbers (e.g., 123, EMP123, STF2024)</p>
+          
         </div>
       </form>
     </div>

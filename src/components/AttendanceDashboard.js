@@ -3,18 +3,9 @@ import React, { useState, useEffect } from 'react';
 const AttendanceDashboard = () => {
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    date: '',
-    search: ''
-  });
-  const [stats, setStats] = useState({
-    total: 0,
-    present: 0,
-    absent: 0,
-    attendanceRate: 0
-  });
+  const [filters, setFilters] = useState({ date: '', search: '' });
+  const [stats, setStats] = useState({ total: 0, present: 0, absent: 0, attendanceRate: 0 });
 
-  // Fetch attendance data
   const fetchAttendance = async () => {
     try {
       setLoading(true);
@@ -26,14 +17,20 @@ const AttendanceDashboard = () => {
       const url = `https://employee-attendance-backend-1.onrender.com/api/attendance?${params}`;
       const response = await fetch(url);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data = await response.json();
+      const rawData = await response.json();
+
+      // Normalize backend data
+      const data = rawData.map((item) => ({
+        id: item.id,
+        employeeName: item.name || item.employeeName || 'Unknown',
+        employeeID: item.employee_id || item.employeeID || '-',
+        date: item.date,
+        status: item.status || 'Unknown'
+      }));
+
       setAttendance(data);
-
-      // Calculate statistics
       calculateStats(data);
     } catch (error) {
       console.error('Error fetching attendance:', error);
@@ -45,22 +42,20 @@ const AttendanceDashboard = () => {
     }
   };
 
-  // Calculate statistics from attendance data
   const calculateStats = (data) => {
     const total = data.length;
-    const present = data.filter(record => record.status === 'Present').length;
-    const absent = data.filter(record => record.status === 'Absent').length;
+    const present = data.filter(record => record.status.toLowerCase() === 'present').length;
+    const absent = data.filter(record => record.status.toLowerCase() === 'absent').length;
     const attendanceRate = total > 0 ? ((present / total) * 100) : 0;
 
     setStats({
       total,
       present,
       absent,
-      attendanceRate: Math.round(attendanceRate * 100) / 100 // 2 decimal places
+      attendanceRate: Math.round(attendanceRate * 100) / 100
     });
   };
 
-  // Load data when component mounts or filters change
   useEffect(() => {
     fetchAttendance();
   }, [filters]);
@@ -79,171 +74,68 @@ const AttendanceDashboard = () => {
           const data = await response.json();
           alert(data.error || 'Failed to delete record');
         }
-      } catch (error) {
+      } catch {
         alert('Error connecting to server');
       }
     }
   };
 
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
+    setFilters(prev => ({ ...prev, [filterType]: value }));
   };
 
-  const clearFilters = () => {
-    setFilters({ date: '', search: '' });
-  };
+  const clearFilters = () => setFilters({ date: '', search: '' });
 
-  if (loading) {
-    return <div className="loading">Loading attendance records...</div>;
-  }
+  if (loading) return <div className="loading">Loading attendance records...</div>;
 
   return (
     <div className="dashboard">
       <h2>Attendance Dashboard</h2>
 
-      {/* Statistics Cards */}
+      {/* Stats */}
       <div className="stats-cards">
-        <div className="stat-card total">
-          <div className="stat-icon"></div>
-          <div className="stat-content">
-            <h3>Total Records</h3>
-            <div className="stat-number">{stats.total}</div>
-            <div className="stat-label">All time attendance</div>
-          </div>
-        </div>
-
-        <div className="stat-card present">
-          <div className="stat-icon"></div>
-          <div className="stat-content">
-            <h3>Present</h3>
-            <div className="stat-number">{stats.present}</div>
-            <div className="stat-label">
-              {stats.total > 0 ? `${((stats.present / stats.total) * 100).toFixed(1)}%` : '0%'}
-            </div>
-          </div>
-        </div>
-
-        <div className="stat-card absent">
-          <div className="stat-icon"></div>
-          <div className="stat-content">
-            <h3>Absent</h3>
-            <div className="stat-number">{stats.absent}</div>
-            <div className="stat-label">
-              {stats.total > 0 ? `${((stats.absent / stats.total) * 100).toFixed(1)}%` : '0%'}
-            </div>
-          </div>
-        </div>
-
-        <div className="stat-card rate">
-          <div className="stat-icon"></div>
-          <div className="stat-content">
-            <h3>Attendance Rate</h3>
-            <div className="stat-number">{stats.attendanceRate}%</div>
-            <div className="stat-label">Overall performance</div>
-          </div>
-        </div>
+        <div className="stat-card total"><h3>Total</h3><div>{stats.total}</div></div>
+        <div className="stat-card present"><h3>Present</h3><div>{stats.present}</div></div>
+        <div className="stat-card absent"><h3>Absent</h3><div>{stats.absent}</div></div>
+        <div className="stat-card rate"><h3>Rate</h3><div>{stats.attendanceRate}%</div></div>
       </div>
 
       {/* Filters */}
       <div className="filters">
-        <div className="filter-group">
-          <label>Search by Name or ID:</label>
-          <input
-            type="text"
-            value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-            placeholder="Search employees..."
-          />
-        </div>
-
-        <div className="filter-group">
-          <label>Filter by Date:</label>
-          <input
-            type="date"
-            value={filters.date}
-            onChange={(e) => handleFilterChange('date', e.target.value)}
-          />
-        </div>
-
-        {(filters.date || filters.search) && (
-          <button className="clear-filters" onClick={clearFilters}>
-            Clear Filters
-          </button>
-        )}
+        <input type="text" placeholder="Search employees..." value={filters.search} onChange={(e) => handleFilterChange('search', e.target.value)} />
+        <input type="date" value={filters.date} onChange={(e) => handleFilterChange('date', e.target.value)} />
+        {(filters.date || filters.search) && <button onClick={clearFilters}>Clear</button>}
       </div>
 
-      {/* Refresh Button */}
-      <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
-        <button 
-          onClick={fetchAttendance}
-          className="refresh-btn"
-        >
-          Refresh Data
-        </button>
-      </div>
+      <button onClick={fetchAttendance}>Refresh Data</button>
 
-      {/* Attendance Table */}
       {attendance.length === 0 ? (
-        <div className="no-data">
-          <p>No attendance records found.</p>
-          {(filters.date || filters.search) ? (
-            <p>
-              Try adjusting your search criteria or{' '}
-              <button 
-                onClick={clearFilters} 
-                style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}
-              >
-                clear filters
-              </button>.
-            </p>
-          ) : (
-            <p>Go to "Mark Attendance" to add records.</p>
-          )}
-        </div>
+        <p>No attendance records found.</p>
       ) : (
-        <div className="attendance-table-container">
-          <div style={{ marginBottom: '1rem', fontWeight: 'bold', color: '#333' }}>
-            Showing {attendance.length} record{attendance.length !== 1 ? 's' : ''}
-          </div>
-          <table className="attendance-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Employee Name</th>
-                <th>Employee ID</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Actions</th>
+        <table className="attendance-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Employee Name</th>
+              <th>Employee ID</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {attendance.map((record) => (
+              <tr key={record.id}>
+                <td>{record.id}</td>
+                <td>{record.employeeName}</td>
+                <td>{record.employeeID}</td>
+                <td>{new Date(record.date).toLocaleDateString()}</td>
+                <td>{record.status}</td>
+                <td><button onClick={() => handleDelete(record.id)}>Delete</button></td>
               </tr>
-            </thead>
-            <tbody>
-              {attendance.map((record) => (
-                <tr key={record.id}>
-                  <td>{record.id}</td>
-                  <td>{record.employeeName}</td>
-                  <td>{record.employeeID}</td>
-                  <td>{new Date(record.date).toLocaleDateString()}</td>
-                  <td>
-                    <span className={`status ${record.status.toLowerCase()}`}>
-                      {record.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button 
-                      className="delete-btn"
-                      onClick={() => handleDelete(record.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
